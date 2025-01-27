@@ -1,12 +1,15 @@
-export interface BuilderOpts {
+import {bundless} from "./bundless";
+
+
+export interface BuildContext{
     cwd?: string;
     pkg?: {
         [key: string]: any;
-    };
+    },
     watch?: boolean
+    vctxConfig?:any
 }
 
-export const builder = (ops: BuilderOpts): Promise<void> => {
-    return new Promise<void>((resolve, reject) => {
-    })
+export const builder = (ctx: BuildContext) => {
+    bundless(ctx)
 }
