@@ -8,8 +8,10 @@
     "publish": "npm publish --registry=https://registry.npmjs.org/"
   },
   "dependencies": {
+    "@types/yargs": "^17.0.33",
     "fast-glob": "^3.3.3",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@swc/core": "^1.10.9",
