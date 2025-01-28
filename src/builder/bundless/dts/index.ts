@@ -1,6 +1,4 @@
 import ts, {JsxEmit, ModuleResolutionKind} from "typescript";
-import path from "node:path";
-import fs from "fs";
 
 export const getDeclarations = async (files:string[]):Promise<{fileName:string,content:string}[]> => {
     const output:{fileName:string,content:string}[] = []
@@ -25,13 +23,10 @@ export const getDeclarations = async (files:string[]):Promise<{fileName:string,c
 
 // 修改编译器Host的writeFile函数，指定输出目录
     compilerHost.writeFile = (fileName, data, writeByteOrderMark) => {
-        console.log("fileName",fileName);
-        const relativePath = path.relative(path.join(process.cwd(),"src"), fileName);
-        console.log("relativePath",relativePath);
-        const outputPath = path.join("dist", relativePath);
-        // fs.mkdirSync(path.dirname(outputPath), {recursive: true});
-        // fs.writeFileSync(outputPath, data, 'utf8');
-
+        // const relativePath = path.relative(path.join(process.cwd(),"src"), fileName);
+        // const outputPath = path.join("dist", relativePath);
+        // // fs.mkdirSync(path.dirname(outputPath), {recursive: true});
+        // // fs.writeFileSync(outputPath, data, 'utf8');
         output.push({fileName:fileName,content:data});
     };
 

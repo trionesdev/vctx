@@ -3,6 +3,10 @@
   "version": "0.0.0-beta.2",
   "description": "Vue 组件库构建工具",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "vctx": "bin/vctx.js"
+  },
   "scripts": {
     "build": "tsc",
     "publish": "npm publish --registry=https://registry.npmjs.org/"
@@ -13,7 +17,10 @@
     "@types/babel__core": "^7.20.5",
     "@types/yargs": "^17.0.33",
     "@vue/babel-plugin-jsx": "^1.2.5",
+    "chokidar": "^4.0.3",
     "fast-glob": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "v8-compile-cache": "^2.4.0",
     "vue": "^3.5.13",
     "yargs": "^17.7.2"
   },

@@ -7,8 +7,7 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "dist",
-    "jsx": "preserve",
-    "jsxImportSource": "vue"
+    "declaration": true
   },
   "include": ["src"]
 }

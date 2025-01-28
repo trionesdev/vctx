@@ -1,4 +1,5 @@
 import glob from "fast-glob"
+import * as chokidar from "chokidar"
 import path from "node:path";
 import fs from "fs";
 import {getDeclarations} from "./dts";
@@ -27,21 +28,32 @@ export interface TransformContext {
     distFilePath: string,
 }
 
-export const bundless = async (buildContext: BundlessContext) => {
-    const files = glob.globSync("**/*", {cwd: "src"})
-    console.log(files)
-    transformFiles(files, {cwd: buildContext.cwd, output: buildContext.vctxConfig?.output || 'dist'})
-
+const handleTransform = async (file: string) => {
+    console.log(file,"change");
 }
 
-const transformFiles = (files: string[], ops: {
+export const bundless = async (buildContext: BundlessContext) => {
+    const files = glob.globSync("**/*", {cwd: "src"})
+    transformFiles(files, {cwd: buildContext.cwd, output: buildContext.vctxConfig?.output || 'dist'})
+    if (buildContext.watch) {
+        const watcher = chokidar.watch("src", {
+            cwd: buildContext.cwd, ignoreInitial: true,
+            awaitWriteFinish: {
+                stabilityThreshold: 20,
+                pollInterval: 10,
+            },
+        }).on("add", handleTransform).on("change", handleTransform)
+    }
+}
+
+const transformFiles = async (files: string[], ops: {
     cwd?: string,
     output: string
 }) => {
     for (const file of files) {
         const filePath = path.join(ops.cwd!, "src", file)
         const sourceContent = fs.readFileSync(filePath, "utf-8");
-        if ([".vue",".js", ".jsx", ".ts", ".tsx"].includes(path.extname(file))) {
+        if ([".vue", ".js", ".jsx", ".ts", ".tsx"].includes(path.extname(file))) {
             const distFilePath = path.join(ops.cwd!, ops.output, path.dirname(file), path.basename(file, path.extname(file)) + ".js")
             const parentPath = path.dirname(distFilePath);
             if (!fs.existsSync(parentPath)) {
@@ -54,6 +66,17 @@ const transformFiles = (files: string[], ops: {
             }
             babelTransformer(ctx, sourceContent).then(({code}) => {
                 fs.writeFileSync(distFilePath, code!)
+            })
+        } else {
+            const distFilePath = path.join(ops.cwd!, ops.output, file)
+            const parentPath = path.dirname(distFilePath);
+            if (!fs.existsSync(parentPath)) {
+                fs.mkdirSync(parentPath, {recursive: true});
+            }
+            fs.copyFile(filePath, distFilePath, (err) => {
+                if (err) {
+                    console.error(err);
+                }
             })
         }
     }

@@ -1,5 +1,5 @@
 import "./index.less"
-import Vue,{defineComponent} from "vue";
+import {defineComponent} from "vue";
 
 export const Button = defineComponent({
     name: 'Button',
@@ -8,6 +8,10 @@ export const Button = defineComponent({
             type: String,
             required: false,
         },
+        text:{
+            type: String,
+            required: true
+        }
     },
     setup(_, { slots }: { slots: Readonly<any> }) {
         return () => <button>
