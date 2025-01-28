@@ -5,6 +5,7 @@ import fs from "fs";
 import _ from "lodash"
 import {getDeclarations} from "./dts";
 import babelTransformer from "./babel";
+import ts, {CompilerOptions} from "typescript";
 
 export type IBundlessFun = (ctx: TransformContext, content: string) => Promise<{ code?: string }>;
 
@@ -31,7 +32,11 @@ export interface TransformContext {
 
 export const bundless = async (buildContext: BundlessContext) => {
     const files = glob.globSync("**/*", {cwd: "src"})
-    const opts = {cwd: buildContext.cwd, output: buildContext.vctxConfig?.output || 'dist'}
+    const config = ts.parseConfigFileTextToJson("tsconfig.json", fs.readFileSync(path.join(buildContext.cwd!, "tsconfig.json"), "utf-8")).config
+    const opts = {
+        cwd: buildContext.cwd, output: buildContext.vctxConfig?.output || 'dist',
+        compilerOptions: ts.convertCompilerOptionsFromJson(config.compilerOptions, "").options
+    }
     transformFiles(files, opts)
 
     const handleTransform = (() => {
@@ -59,6 +64,7 @@ export const bundless = async (buildContext: BundlessContext) => {
 const transformFiles = async (files: string[], ops: {
     cwd?: string,
     output: string
+    compilerOptions?: CompilerOptions
 }) => {
     for (const file of files) {
         const filePath = path.join(ops.cwd!, "src", file)
@@ -97,7 +103,11 @@ const transformFiles = async (files: string[], ops: {
     }).map(file => {
         return path.join(ops.cwd!, "src", file);
     });
-    getDeclarations(tsFiles, ops.output).then((dtsFiles) => {
+    const dtsCtx = {
+        outDir: ops.output,
+        compilerOptions: ops.compilerOptions
+    }
+    getDeclarations(dtsCtx, tsFiles).then((dtsFiles) => {
         dtsFiles.forEach((dtsFile) => {
             fs.writeFileSync(path.join(ops.cwd!, dtsFile.fileName), dtsFile.content)
         })
