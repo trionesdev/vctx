@@ -37,7 +37,7 @@ export const bundless = async (buildContext: BundlessContext) => {
         cwd: buildContext.cwd, output: buildContext.vctxConfig?.output || 'dist',
         compilerOptions: ts.convertCompilerOptionsFromJson(config.compilerOptions, "").options
     }
-    transformFiles(files, opts)
+    await transformFiles(files, opts)
 
     const handleTransform = (() => {
 
