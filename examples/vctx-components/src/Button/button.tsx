@@ -10,7 +10,7 @@ export const Button = defineComponent({
         },
         text:{
             type: String,
-            required: true
+            required: false
         }
     },
     setup(_, { slots }: { slots: Readonly<any> }) {

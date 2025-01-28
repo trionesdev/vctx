@@ -1,6 +1,6 @@
 import ts, {JsxEmit, ModuleResolutionKind} from "typescript";
 
-export const getDeclarations = async (files:string[]):Promise<{fileName:string,content:string}[]> => {
+export const getDeclarations = async (files:string[],outDir:string):Promise<{fileName:string,content:string}[]> => {
     const output:{fileName:string,content:string}[] = []
     let compilerOptions = {};
     compilerOptions = {
@@ -14,7 +14,7 @@ export const getDeclarations = async (files:string[]):Promise<{fileName:string,c
         jsxImportSource: "vue",
         declaration: true,
         emitDeclarationOnly: true,
-        outDir:"dist"
+        outDir:outDir
     }
 
 

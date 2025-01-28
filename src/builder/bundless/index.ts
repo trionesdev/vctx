@@ -2,6 +2,7 @@ import glob from "fast-glob"
 import * as chokidar from "chokidar"
 import path from "node:path";
 import fs from "fs";
+import _ from "lodash"
 import {getDeclarations} from "./dts";
 import babelTransformer from "./babel";
 
@@ -28,13 +29,22 @@ export interface TransformContext {
     distFilePath: string,
 }
 
-const handleTransform = async (file: string) => {
-    console.log(file,"change");
-}
-
 export const bundless = async (buildContext: BundlessContext) => {
     const files = glob.globSync("**/*", {cwd: "src"})
-    transformFiles(files, {cwd: buildContext.cwd, output: buildContext.vctxConfig?.output || 'dist'})
+    const opts = {cwd: buildContext.cwd, output: buildContext.vctxConfig?.output || 'dist'}
+    transformFiles(files, opts)
+
+    const handleTransform = (() => {
+
+        const startTransform = _.debounce(() => {
+            console.log("file", "change");
+            transformFiles(files, opts)
+        }, 300)
+        return (filePath: string) => {
+            startTransform();
+        }
+    })()
+
     if (buildContext.watch) {
         const watcher = chokidar.watch("src", {
             cwd: buildContext.cwd, ignoreInitial: true,
@@ -54,7 +64,8 @@ const transformFiles = async (files: string[], ops: {
         const filePath = path.join(ops.cwd!, "src", file)
         const sourceContent = fs.readFileSync(filePath, "utf-8");
         if ([".vue", ".js", ".jsx", ".ts", ".tsx"].includes(path.extname(file))) {
-            const distFilePath = path.join(ops.cwd!, ops.output, path.dirname(file), path.basename(file, path.extname(file)) + ".js")
+            const distFile = path.join(ops.output, path.dirname(file), path.basename(file, path.extname(file)) + ".js");
+            const distFilePath = path.join(ops.cwd!, distFile)
             const parentPath = path.dirname(distFilePath);
             if (!fs.existsSync(parentPath)) {
                 fs.mkdirSync(parentPath, {recursive: true});
@@ -66,6 +77,7 @@ const transformFiles = async (files: string[], ops: {
             }
             babelTransformer(ctx, sourceContent).then(({code}) => {
                 fs.writeFileSync(distFilePath, code!)
+                console.log(`bundless ${file} to ${distFile}`);
             })
         } else {
             const distFilePath = path.join(ops.cwd!, ops.output, file)
@@ -85,7 +97,7 @@ const transformFiles = async (files: string[], ops: {
     }).map(file => {
         return path.join(ops.cwd!, "src", file);
     });
-    getDeclarations(tsFiles).then((dtsFiles) => {
+    getDeclarations(tsFiles, ops.output).then((dtsFiles) => {
         dtsFiles.forEach((dtsFile) => {
             fs.writeFileSync(path.join(ops.cwd!, dtsFile.fileName), dtsFile.content)
         })
