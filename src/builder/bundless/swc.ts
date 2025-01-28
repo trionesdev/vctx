@@ -13,7 +13,8 @@ const swcTransformer: IBundlessFun = async (ctx:TransformContext,content: string
             transform: {
                 react: {
                     runtime: "classic",
-                    pragma: "Vue.h",
+                    pragma: "h",
+                    throwIfNamespace: true,
                 }
             },
         },

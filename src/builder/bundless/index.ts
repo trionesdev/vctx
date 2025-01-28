@@ -4,6 +4,7 @@ import path from "node:path";
 import fs from "fs";
 import {getDeclarations} from "./dts";
 import ts from "typescript";
+import babelTransformer from "./babel";
 
 export type IBundlessFun = (ctx: TransformContext, content: string) => Promise<{ code?: string }>;
 
@@ -55,7 +56,7 @@ const transformFiles = (files: string[], ops: {
                 distFilePath: distFilePath,
             }
             console.log(ctx)
-            swcTransformer(ctx, sourceContent).then(({code}) => {
+            babelTransformer(ctx, sourceContent).then(({code}) => {
                 fs.writeFileSync(distFilePath, code!)
             })
         }
