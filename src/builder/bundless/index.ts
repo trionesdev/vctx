@@ -103,13 +103,15 @@ const transformFiles = async (files: string[], ops: {
     }).map(file => {
         return path.join(ops.cwd!, "src", file);
     });
-    const dtsCtx = {
-        outDir: ops.output,
-        compilerOptions: ops.compilerOptions
-    }
-    getDeclarations(dtsCtx, tsFiles).then((dtsFiles) => {
-        dtsFiles.forEach((dtsFile) => {
-            fs.writeFileSync(path.join(ops.cwd!, dtsFile.fileName), dtsFile.content)
+    if (!_.isEmpty(tsFiles)) {
+        const dtsCtx = {
+            outDir: ops.output,
+            compilerOptions: ops.compilerOptions
+        }
+        getDeclarations(dtsCtx, tsFiles).then((dtsFiles) => {
+            dtsFiles.forEach((dtsFile) => {
+                fs.writeFileSync(path.join(ops.cwd!, dtsFile.fileName), dtsFile.content)
+            })
         })
-    })
+    }
 }
